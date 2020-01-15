@@ -19,6 +19,11 @@ import * as ts from "typescript";
 
 import * as Lint from "tslint/lib/index";
 
+const exclude = [
+  'function mapStateToProps(',
+  'function mapDispatchToProps('
+]
+
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
@@ -90,8 +95,10 @@ export class JsdocCommentsWalker extends Lint.RuleWalker {
   }
 
   public visitFunctionDeclaration(node: ts.FunctionDeclaration) {
-    if (!this.hasOption("no-functions")) {
-      this.validateJsDocComment(node);
+    const text = node.getText();
+    const skip = exclude.some(exception => text.startsWith(exception));
+    if (!this.hasOption("no-functions") && !skip) {
+        this.validateJsDocComment(node);
     }
     super.visitFunctionDeclaration(node);
   }
